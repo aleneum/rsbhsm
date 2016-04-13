@@ -1,9 +1,6 @@
 import sys
 from setuptools import setup
 
-with open('transitions/version.py') as f:
-    exec(f.read())
-
 if len(set(('test', 'easy_install')).intersection(sys.argv)) > 0:
     import setuptools
 

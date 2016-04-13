@@ -103,7 +103,7 @@ class RSBState(State):
             event_data.machine.callback(self.action.enter, event_data)
 
     def exit(self, event_data):
-        if self.action_cls:
+        if self.action:
             self.action.exit()
             del self.action
             self.action = None
