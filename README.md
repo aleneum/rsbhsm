@@ -1,10 +1,10 @@
 # rsb-transitions
-Hierarchical state machine with [RSB](https://pypi.python.org/pypi/rsb-python/0.12.1) support based on [transitions](https://travis-ci.org/tyarkoni/transitions) (version >= 0.4.0).
+Hierarchical state machine with [RSB](https://pypi.python.org/pypi/rsb-python/0.12.1) support based on [transitions](https://github.com/tyarkoni/transitions) (version >= 0.4.0).
 
 Features include:
 * full lifecycle state management
 * automatic listener management for transitions
-* and much [more](https://travis-ci.org/tyarkoni/transitions)
+* and much [more](https://github.com/tyarkoni/transitions)
 
 The basic usage of `rsbhsm` does not differ much from other transition state machines.
 
@@ -25,8 +25,8 @@ transitions = [
     {'trigger': 'spring', 'source':'stand', 'dest': 'run', 'conditions':'well_trained'},
     # also direct function pointers
     {'trigger': 'break_required', 'source':'run', 'dest': 'stand', 'unless':model.well_trained},
-    # chained processing
-    {'trigger': 'break_required', 'source':'run', 'dest': 'stand'}
+    # chained processing; since previous transitions fails, this one will be executed
+    {'trigger': 'break_required', 'source':'run', 'dest': 'walk'}
 ]
 
 machine = Machine(model, states=states, transitions=transitions)
