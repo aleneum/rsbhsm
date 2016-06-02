@@ -60,7 +60,6 @@ class RSBTransition(Transition):
 
         if not self.scope:
             return
-        self._func = lambda: True
         if isinstance(msg_type, string_types):
             logger.info('register trype %s' % msg_type)
             cls_name = msg_type.split('.')[-1]
