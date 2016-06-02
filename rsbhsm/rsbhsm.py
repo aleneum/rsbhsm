@@ -1,6 +1,7 @@
 from transitions.extensions import LockedHierarchicalGraphMachine as Machine
 from transitions.extensions.nesting import NestedState as State
 from transitions.extensions.factory import NestedGraphTransition as Transition
+from transitions.extensions.factory import LockedNestedEvent as Event
 
 import importlib
 import logging
@@ -21,16 +22,43 @@ import rst
 import rstsandbox
 
 
+# TODO: Refactor RSBTransition into RSBEvent; makes way more sense to register scopes and trigger to events rather than to
+# transitions
+
+
+class RSBEvent(Event):
+
+    def __init__(self, *args, **kwargs):
+        super(RSBEvent, self).__init__(args, kwargs)
+        self._listeners = {}
+
+    def activate(self, scope):
+        if scope not in self._listeners:
+            logger.info("activate logger for scope %s" % scope)
+            self._listeners[scope] = rsb.createListener(scope)
+            self._listeners[scope].addHandler(self._on_msg)
+
+    def deactivate(self, scope):
+        if scope in self._listeners:
+            logger.info("deactivate logger for scope %s" % scope)
+            l = self._listeners.pop(scope, None)
+            if l:
+                del l
+
+    def _on_msg(self, rsb_event):
+        self.trigger(data=rsb_event.data)
+
+
 class RSBTransition(Transition):
 
     def __init__(self, *args, **kwargs):
-        self._scope = kwargs.pop('scope', None)
+        self.scope = kwargs.pop('scope', None)
         msg_type = kwargs.pop('type', None)
 
         super(RSBTransition, self).__init__(*args, **kwargs)
         self._listener = None
 
-        if not self._scope:
+        if not self.scope:
             return
         self._func = lambda: True
         if isinstance(msg_type, string_types):
@@ -55,29 +83,12 @@ class RSBTransition(Transition):
         tmp = event_data.machine.current_state
         for ev in event_data.machine.events.values():
             if tmp.name in ev.transitions:
-                for e in ev.transitions[event_data.machine.current_state.name]:
-                    e.activate(ev.trigger)
+                ev.activate(self.scope)
 
     @staticmethod
     def deactivate_all(transitions):
         for e in transitions:
-            e.deactivate()
-
-    def activate(self, func):
-        if self._scope:
-            logger.info("activate logger for scope %s" % self._scope)
-            self._listener = rsb.createListener(self._scope)
-            self._func = func
-            self._listener.addHandler(self._on_msg)
-
-    def deactivate(self):
-        if self._scope:
-            if hasattr(self, '_listener') and self._listener:
-                logger.info("deactivate logger for scope %s" % self._scope)
-                del self._listener
-
-    def _on_msg(self, rsb_event):
-        self._func(data=rsb_event.data)
+            e.deactivate(e.scope)
 
 
 class RSBState(State):
@@ -119,6 +130,9 @@ class RSBHierarchicalStateMachine(Machine):
     @staticmethod
     def _create_transition(*args, **kwargs):
         return RSBTransition(*args, **kwargs)
+
+    def _create_event(*args, **kwargs):
+        return RSBEvent(*args, **kwargs)
 
     def shut_down(self):
         for ev in self.events.values():
