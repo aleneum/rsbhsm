@@ -1,3 +1,5 @@
 six
 transitions
 rsb-python
+rstsandbox
+rststable
