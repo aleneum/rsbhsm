@@ -64,6 +64,11 @@ class TestTransitions(TestThreadedHSM):
         self.assertTrue(self.stuff.test_condition.called)
         self.stuff.to_B()
 
+    def test_shutdown(self):
+        self.stuff.machine.add_transition('advance', 'A', 'B', conditions='test_condition', type=int, scope=self.TEST_SCOPE)
+        self.stuff.to_A()
+        self.stuff.machine.shut_down()
+
     def test_listener_init(self):
         self.stuff.machine.add_transition('advance', 'A', 'B', conditions='test_condition', type=int, scope=self.TEST_SCOPE)
         self.stuff.to_C()
@@ -125,6 +130,19 @@ class TestTransitions(TestThreadedHSM):
         self.assertIsNone(state.action)
         states = [{'name': 'Y',
           'action': MagicMock}]
+        machine = Machine(states=states)
+
+    def test_rsb_action_string(self):
+        state = State('X', action='mock.MagicMock')
+        self.stuff.machine.add_state(state)
+        self.assertIsNone(state.action)
+        self.assertIsNotNone(state.action_cls)
+        self.stuff.to_X()
+        self.assertIsNotNone(state.action)
+        self.assertEqual(state.action.enter.call_count, 1)
+        self.assertFalse(state.action.exit.called)
+        states = [{'name': 'Y',
+          'action': 'mock.MagicMock'}]
         machine = Machine(states=states)
 
     def test_custom_state(self):

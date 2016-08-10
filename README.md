@@ -1,4 +1,4 @@
-# rsb-transitions
+# rsbhsm
 Hierarchical state machine with [RSB](https://pypi.python.org/pypi/rsb-python/0.12.1) support based on [transitions](https://github.com/tyarkoni/transitions) (version >= 0.4.0).
 
 Features include:

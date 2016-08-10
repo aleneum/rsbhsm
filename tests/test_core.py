@@ -383,7 +383,7 @@ class TestTransitions(TestCase):
 
         def change_state(machine):
             self.assertEqual(machine.current_state.name, 'A')
-            if machine.async:
+            if machine.has_queue:
                 machine.run(machine=machine)
                 self.assertEqual(machine.current_state.name, 'A')
             else:
@@ -399,7 +399,7 @@ class TestTransitions(TestCase):
         m = Machine(states=states, transitions=transitions, initial='A')
         m.walk(machine=m)
         self.assertEqual(m.current_state.name, 'B')
-        m = Machine(states=states, transitions=transitions, initial='A', async=True)
+        m = Machine(states=states, transitions=transitions, initial='A', queued=True)
         m.walk(machine=m)
         self.assertEqual(m.current_state.name, 'C')
 
