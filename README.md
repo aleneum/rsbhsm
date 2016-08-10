@@ -1,4 +1,4 @@
-# rsbhsm
+# rsbhsm [![Build Status](https://travis-ci.org/aleneum/rsbhsm.svg?branch=master)](https://travis-ci.org/aleneum/rsbhsm) [![Coverage Status](https://coveralls.io/repos/github/aleneum/rsbhsm/badge.svg?branch=master)](https://coveralls.io/github/aleneum/rsbhsm?branch=master)
 Hierarchical state machine with [RSB](https://pypi.python.org/pypi/rsb-python/0.12.1) support based on [transitions](https://github.com/tyarkoni/transitions) (version >= 0.4.0).
 
 Features include:
