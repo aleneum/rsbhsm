@@ -17,22 +17,26 @@ if 'setuptools' in sys.modules:
 
 setup(
     name="rsbhsm",
-    version="0.1",
+    version="0.1.0",
     description="An RSB extension for transitions",
     author='Alexander Neumann',
     author_email='aleneum@gmail.com',
     url='http://github.com/aleneum/rsbhsm',
+    download_url='https://github.com/aleneum/rsbhsm/archive/0.1.0.zip',
     packages=["rsbhsm"],
     package_data={'rsbhsm': ['data/*'],
                   'rsbhsm.tests': ['data/*']
                   },
-    install_requires=['transitions>=0.4.0', 'six', 'rsb-python'],
+    install_requires=['transitions>=0.4.0', 'six', 'rsb-python', 'rstsandbox', 'rststable'],
     tests_require=tests_require,
     license='MIT',
     classifiers=[
         'License :: OSI Approved :: MIT License',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+
         # not supported by RSB yet
         # 'Programming Language :: Python :: 3',
         # 'Programming Language :: Python :: 3.3',
