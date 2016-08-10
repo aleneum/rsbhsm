@@ -13,3 +13,4 @@ addons:
   apt:
     packages:
       - graphviz
+      - protobuf-compiler
