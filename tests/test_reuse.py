@@ -40,7 +40,7 @@ class TestTransitions(TestCase):
         counter = Machine(states=states, transitions=transitions, before_state_change='check',
                           after_state_change='clear', initial='1')
 
-        new_states = ['A', 'B', {'name':'C', 'children': counter}]
+        new_states = ['A', 'B', {'name': 'C', 'children': counter}]
         new_transitions = [
             {'trigger': 'forward', 'source': 'A', 'dest': 'B'},
             {'trigger': 'forward', 'source': 'B', 'dest': 'C%s1' % State.separator},
@@ -135,7 +135,7 @@ class TestTransitions(TestCase):
 
         m = Machine(None, states=correct)
         if State.separator in '_':
-             m.to_B_C_3_a()
+            m.to_B_C_3_a()
         else:
             m.to_B.C._3.a()
 
@@ -166,7 +166,7 @@ class TestTransitions(TestCase):
 
         counter = self.stuff.machine_cls(states=count_states, transitions=count_trans, initial='1')
 
-        counter.increase() # love my counter
+        counter.increase()  # love my counter
         states = ['waiting', 'collecting', {'name': 'counting', 'children': counter}]
         states_remap = ['waiting', 'collecting', {'name': 'counting', 'children': counter, 'remap': {'done': 'waiting'}}]
 

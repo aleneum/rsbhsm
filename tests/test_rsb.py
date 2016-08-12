@@ -20,6 +20,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
+
 def condition_check(data):
     return data > 1
 
@@ -129,7 +130,7 @@ class TestTransitions(TestThreadedHSM):
         self.stuff.to_A()
         self.assertIsNone(state.action)
         states = [{'name': 'Y',
-          'action': MagicMock}]
+                  'action': MagicMock}]
         machine = Machine(states=states)
 
     def test_rsb_action_string(self):
@@ -142,7 +143,7 @@ class TestTransitions(TestThreadedHSM):
         self.assertEqual(state.action.enter.call_count, 1)
         self.assertFalse(state.action.exit.called)
         states = [{'name': 'Y',
-          'action': 'mock.MagicMock'}]
+                  'action': 'mock.MagicMock'}]
         machine = Machine(states=states)
 
     def test_custom_state(self):

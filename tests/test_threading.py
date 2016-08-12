@@ -60,7 +60,7 @@ class TestLockedTransitions(TestCore):
         self.assertEqual(self.stuff.state, "C")
 
     def test_conditional_access(self):
-        self.stuff.heavy_checking = heavy_checking # checking takes 1s and returns False
+        self.stuff.heavy_checking = heavy_checking  # checking takes 1s and returns False
         self.stuff.machine.add_transition('advance', 'A', 'B', conditions='heavy_checking')
         self.stuff.machine.add_transition('advance', 'A', 'D')
         t = Thread(target=self.stuff.advance)
@@ -103,15 +103,15 @@ class TestLockedTransitions(TestCore):
         # to be executed
         self.assertTrue(stuff2.machine.is_state("B"))
         blocked = time.time()
-        self.assertAlmostEqual(fast-begin, 0, delta=0.1)
-        self.assertAlmostEqual(blocked-begin, 1, delta=0.1)
+        self.assertAlmostEqual(fast - begin, 0, delta=0.1)
+        self.assertAlmostEqual(blocked - begin, 1, delta=0.1)
 
 
 # Same as TestLockedTransition but with LockedHierarchicalMachine
 class TestLockedHierarchicalTransitions(TestsNested, TestLockedTransitions):
     def setUp(self):
         states = ['A', 'B', {'name': 'C', 'children': ['1', '2', {'name': '3', 'children': ['a', 'b', 'c']}]},
-          'D', 'E', 'F']
+                  'D', 'E', 'F']
         self.stuff = Stuff(states, machine_cls=MachineFactory.get_predefined(locked=True, nested=True))
         self.stuff.heavy_processing = heavy_processing
         self.stuff.machine.add_transition('process', '*', 'B', before='heavy_processing')
@@ -159,5 +159,5 @@ class TestLockedHierarchicalTransitions(TestsNested, TestLockedTransitions):
         # to be executed
         self.assertTrue(stuff2.machine.is_state("B"))
         blocked = time.time()
-        self.assertAlmostEqual(fast-begin, 0, delta=0.1)
-        self.assertAlmostEqual(blocked-begin, 1, delta=0.1)
+        self.assertAlmostEqual(fast - begin, 0, delta=0.1)
+        self.assertAlmostEqual(blocked - begin, 1, delta=0.1)

@@ -12,15 +12,15 @@ from six import string_types
 import rsb
 import rsb.converter
 
+# used in dynamic rst message generation
+import rst
+import rstsandbox
+
 logging.getLogger("rsb").setLevel(logging.WARNING)
 logging.getLogger("rst").setLevel(logging.ERROR)
 logging.getLogger("rstsandbox").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
-# used in dynamic rst message generation
-import rst
-import rstsandbox
 
 
 class RSBEvent(Event):
@@ -145,4 +145,3 @@ class RSBHierarchicalStateMachine(Machine):
     def shut_down(self):
         for ev in self.events.values():
             ev.deactivate()
-
