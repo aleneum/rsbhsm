@@ -381,14 +381,14 @@ class TestTransitions(TestCase):
         states = ['A', 'B', 'C', 'D']
         # Define with list of dictionaries
 
-        def change_state(machine):
-            self.assertEqual(machine.current_state.name, 'A')
+        def change_state(mod, machine):
+            self.assertEqual(mod.state, 'A')
             if machine.has_queue:
-                machine.run(machine=machine)
-                self.assertEqual(machine.current_state.name, 'A')
+                machine.run(mod=mod, machine=machine)
+                self.assertEqual(mod.state, 'A')
             else:
                 with self.assertRaises(MachineError):
-                    machine.run(machine=machine)
+                    machine.run(mod=mod, machine=machine)
 
         transitions = [
             {'trigger': 'walk', 'source': 'A', 'dest': 'B', 'before': change_state},
@@ -397,11 +397,11 @@ class TestTransitions(TestCase):
         ]
 
         m = Machine(states=states, transitions=transitions, initial='A')
-        m.walk(machine=m)
-        self.assertEqual(m.current_state.name, 'B')
+        m.walk(mod=m, machine=m)
+        self.assertEqual(m.state, 'B')
         m = Machine(states=states, transitions=transitions, initial='A', queued=True)
-        m.walk(machine=m)
-        self.assertEqual(m.current_state.name, 'C')
+        m.walk(mod=m, machine=m)
+        self.assertEqual(m.state, 'C')
 
     def test___getattr___and_identify_callback(self):
         m = Machine(Stuff(), states=['A', 'B', 'C'], initial='A')

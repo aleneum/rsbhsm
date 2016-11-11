@@ -49,7 +49,8 @@ class RSBEvent(Event):
                 del l
 
     def _on_msg(self, rsb_event):
-        self.trigger(data=rsb_event.data)
+        for model in self.machine.models:
+            self.trigger(model, data=rsb_event.data)
 
 
 class RSBTransition(Transition):
@@ -72,7 +73,7 @@ class RSBTransition(Transition):
             rsb.converter.registerGlobalConverter(self.converter, True)
 
     def _change_state(self, event_data):
-        tmp = event_data.machine.current_state
+        tmp = event_data.machine.get_state(event_data.model.state)
         for ev in event_data.machine.events.values():
             while tmp.parent and tmp.name not in ev.transitions:
                 tmp = tmp.parent
@@ -82,7 +83,7 @@ class RSBTransition(Transition):
                                      args=(arg, ev))
                 t.start()
         super(RSBTransition, self)._change_state(event_data)
-        tmp = event_data.machine.current_state
+        tmp = event_data.machine.get_state(event_data.model.state)
         for ev in event_data.machine.events.values():
             if tmp.name in ev.transitions:
                 trans = ev.transitions[tmp.name]

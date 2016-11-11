@@ -271,7 +271,7 @@ class TestTransitions(TestsCore):
         s.to_C()
         self.assertEqual(s.state, 'C')
         state = 'C{0}3{0}a'.format(State.separator)
-        s.machine.to(state)
+        s.machine.to(s, state)
         self.assertEqual(s.state, state)
 
     def test_example_one(self):

@@ -17,7 +17,7 @@ if 'setuptools' in sys.modules:
 
 setup(
     name="rsbhsm",
-    version="0.1.0",
+    version="0.2.0",
     description="An RSB extension for transitions",
     author='Alexander Neumann',
     author_email='aleneum@gmail.com',
