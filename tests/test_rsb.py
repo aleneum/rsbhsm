@@ -174,3 +174,23 @@ class TestRSBTransitions(TestThreadedHSM):
 
     def test_pickle(self):
         pass
+
+    def test_keep_event_listeners(self):
+        s = ['0', 'A', 'B', 'C']
+        t = [{'trigger': 'go', 'source': '0', 'dest': 'A'},
+             {'trigger': 'foo', 'source': 'A', 'dest': 'B', 'scope': '/foo'},
+             {'trigger': 'foo', 'source': 'B', 'dest': 'C', 'scope': '/foo'},
+             {'trigger': 'bar', 'source': 'A', 'dest': 'C', 'scope': '/bar'}]
+
+        m = Machine(states=s, transitions=t, auto_transitions=False, initial='0')
+        for e in m.events.values():
+            e.activate = MagicMock()
+            e.deactivate = MagicMock()
+        m.go()
+        self.assertTrue(m.events['foo'].activate.called)
+        self.assertTrue(m.events['bar'].activate.called)
+        m.foo()
+        self.assertEqual(m.state, 'B')
+        # foo is still a valid event in state B. Should not be deactivated. 'bar' is not valid any longer
+        self.assertFalse(m.events['foo'].deactivate.called)
+        self.assertTrue(m.events['bar'].deactivate.called)
