@@ -26,27 +26,33 @@ logger.addHandler(logging.NullHandler())
 class RSBEvent(Event):
 
     def __init__(self, *args, **kwargs):
+        self.scope = None
+        self.listener = None
         super(RSBEvent, self).__init__(*args, **kwargs)
-        self._listeners = {}
 
-    def activate(self, scope):
-        if scope not in self._listeners:
-            logger.info("activate logger for scope %s" % scope)
-            self._listeners[scope] = rsb.createListener(scope)
-            self._listeners[scope].addHandler(self._on_msg)
+    def set_rsb(self, scope, msg_type=None):
+        if self.scope and scope is not self.scope:
+            raise ValueError('Scope has been set already and cannot be reassigned')
+        self.scope = scope
+        if isinstance(msg_type, string_types):
+            logger.info('register trype %s' % msg_type)
+            cls_name = msg_type.split('.')[-1]
+            x = importlib.import_module(msg_type + "_pb2")
+            cls = getattr(x, cls_name)
+            converter = rsb.converter.ProtocolBufferConverter(messageClass=cls)
+            rsb.converter.registerGlobalConverter(converter, True)
 
-    def deactivate(self, scope=None):
-        if scope is None:
-            for s, listener in self._listeners.items():
-                logger.info("deactivate logger for scope %s" % s)
-                l = self._listeners.pop(s, None)
-                if l:
-                    del l
-        elif scope in self._listeners:
-            logger.info("deactivate logger for scope %s" % scope)
-            l = self._listeners.pop(scope, None)
-            if l:
-                del l
+    def activate(self):
+        if self.scope is not None and self.listener is None:
+            logger.info("activate logger for scope %s" % self.scope)
+            self.listener = rsb.createListener(self.scope)
+            self.listener.addHandler(self._on_msg)
+
+    def deactivate(self):
+        if self.listener is not None:
+            logger.info("deactivate logger for scope %s" % self.scope)
+            self.listener, tmp = None, self.listener
+            del tmp
 
     def _on_msg(self, rsb_event):
         for model in self.machine.models:
@@ -56,45 +62,29 @@ class RSBEvent(Event):
 class RSBTransition(Transition):
 
     def __init__(self, *args, **kwargs):
-        self.scope = kwargs.pop('scope', None)
-        msg_type = kwargs.pop('type', None)
-
         super(RSBTransition, self).__init__(*args, **kwargs)
-        self._listener = None
-
-        if not self.scope:
-            return
-        if isinstance(msg_type, string_types):
-            logger.info('register trype %s' % msg_type)
-            cls_name = msg_type.split('.')[-1]
-            x = importlib.import_module(msg_type + "_pb2")
-            cls = getattr(x, cls_name)
-            self.converter = rsb.converter.ProtocolBufferConverter(messageClass=cls)
-            rsb.converter.registerGlobalConverter(self.converter, True)
 
     def _change_state(self, event_data):
-        tmp = event_data.machine.get_state(event_data.model.state)
-        for ev in event_data.machine.events.values():
-            while tmp.parent and tmp.name not in ev.transitions:
-                tmp = tmp.parent
-            if tmp.name in ev.transitions:
-                arg = ev.transitions[tmp.name]
-                t = threading.Thread(target=RSBTransition.deactivate_all,
-                                     args=(arg, ev))
-                t.start()
+        trigger_src = event_data.machine.get_triggers(self.source)
+        trigger_dst = event_data.machine.get_triggers(self.dest)
+
+        evs = []
+        for t in trigger_src:
+            if t not in trigger_dst:
+                evs.append(event_data.machine.events[t])
+
+        threading.Thread(target=RSBTransition.deactivate,
+                         args=(evs,)).start()
+
+
         super(RSBTransition, self)._change_state(event_data)
-        tmp = event_data.machine.get_state(event_data.model.state)
-        for ev in event_data.machine.events.values():
-            if tmp.name in ev.transitions:
-                trans = ev.transitions[tmp.name]
-                for t in trans:
-                    if t.scope:
-                        ev.activate(t.scope)
+        for t in trigger_dst:
+            event_data.machine.events[t].activate()
 
     @staticmethod
-    def deactivate_all(transitions, event):
-        for e in transitions:
-            event.deactivate(e.scope)
+    def deactivate(events):
+        for e in events:
+            e.deactivate()
 
 
 class RSBState(State):
@@ -130,6 +120,14 @@ class RSBState(State):
 
 
 class RSBHierarchicalStateMachine(Machine):
+
+    def add_transition(self, *args, **kwargs):
+        scope = kwargs.pop('scope', None)
+        msg_type = kwargs.pop('type', None)
+        super(RSBHierarchicalStateMachine, self).add_transition(*args, **kwargs)
+        trigger_name = kwargs['trigger'] if 'trigger' in kwargs else args[0]
+        self.events[trigger_name].set_rsb(scope, msg_type)
+
 
     @staticmethod
     def _create_state(*args, **kwargs):
