@@ -29,7 +29,7 @@ def condition_check_rst(data):
     return data.int > 1
 
 
-class TestTransitions(TestThreadedHSM):
+class TestRSBTransitions(TestThreadedHSM):
     TEST_SCOPE = '/test/transitions'
 
     def setUp(self):
@@ -96,10 +96,10 @@ class TestTransitions(TestThreadedHSM):
         self.stuff.to_A()
         self.stuff.informer.publishData(0)
         time.sleep(0.1)
-        self.assertTrue(self.stuff.machine.is_state('A'))
+        self.assertTrue(self.stuff.is_A())
         self.stuff.informer.publishData(2)
         time.sleep(0.1)
-        self.assertTrue(self.stuff.machine.is_state('B'))
+        self.assertTrue(self.stuff.is_B())
         self.stuff.to_C()
 
     def test_listener_rst(self):
@@ -111,11 +111,11 @@ class TestTransitions(TestThreadedHSM):
         self.stuff.to_A()
         self.stuff.informer_rst.publishData(val)
         time.sleep(0.1)
-        self.assertTrue(self.stuff.machine.is_state('A'))
+        self.assertTrue(self.stuff.is_A())
         val.int = 2
         self.stuff.informer_rst.publishData(val)
         time.sleep(0.1)
-        self.assertTrue(self.stuff.machine.is_state('B'))
+        self.assertTrue(self.stuff.is_B())
         self.stuff.to_C()
 
     def test_rsb_state(self):
@@ -164,12 +164,33 @@ class TestTransitions(TestThreadedHSM):
         state = State('X', action=StateAction)
         self.stuff.machine.add_state(state)
         self.stuff.machine.add_transition('foo', '*', 'X')
-        self.stuff.foo('foo')
+        # change this test when transitions 0.4.3 has been released to foo('foo')
+        self.stuff.foo(foo='foo')
         self.stuff.to_A()
         with self.assertRaises(ValueError):
-            self.stuff.foo('bar')
+            self.stuff.foo(foo='bar')
         self.stuff.to_A()
         self.assertTrue(self.stuff.is_exited)
 
     def test_pickle(self):
         pass
+
+    def test_keep_event_listeners(self):
+        s = ['0', 'A', 'B', 'C']
+        t = [{'trigger': 'go', 'source': '0', 'dest': 'A'},
+             {'trigger': 'foo', 'source': 'A', 'dest': 'B', 'scope': '/foo'},
+             {'trigger': 'foo', 'source': 'B', 'dest': 'C', 'scope': '/foo'},
+             {'trigger': 'bar', 'source': 'A', 'dest': 'C', 'scope': '/bar'}]
+
+        m = Machine(states=s, transitions=t, auto_transitions=False, initial='0')
+        for e in m.events.values():
+            e.activate = MagicMock()
+            e.deactivate = MagicMock()
+        m.go()
+        self.assertTrue(m.events['foo'].activate.called)
+        self.assertTrue(m.events['bar'].activate.called)
+        m.foo()
+        self.assertEqual(m.state, 'B')
+        # foo is still a valid event in state B. Should not be deactivated. 'bar' is not valid any longer
+        self.assertFalse(m.events['foo'].deactivate.called)
+        self.assertTrue(m.events['bar'].deactivate.called)

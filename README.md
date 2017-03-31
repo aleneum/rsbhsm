@@ -38,13 +38,15 @@ The additional keyword for `RSBState` is `action`:
 
 ```python
 
-states = [
-    {'name': 'run', 'action':'my.action.class'}
-]
+from my.action import AnotherClass
 
+states = [
+    {'name': 'run', 'action': 'my.action.Class'},
+    {'name': 'sit', 'action': AnotherClass}
+]
 ```
 
-If an `RSBState` is entered, an object of 'my.action.class' is created and destroyed whenever it is exited.
+If an `RSBState` is entered, an object of 'my.action.Class' is created and destroyed whenever it is exited.
 This class *must* implement an `enter` and `exit` method which will be called according to the event.
 
 A minimal action can look like this:

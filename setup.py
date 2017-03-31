@@ -17,7 +17,7 @@ if 'setuptools' in sys.modules:
 
 setup(
     name="rsbhsm",
-    version="0.1.0",
+    version="0.2.0",
     description="An RSB extension for transitions",
     author='Alexander Neumann',
     author_email='aleneum@gmail.com',
@@ -27,7 +27,7 @@ setup(
     package_data={'rsbhsm': ['data/*'],
                   'rsbhsm.tests': ['data/*']
                   },
-    install_requires=['transitions>=0.4.0', 'six', 'rsb-python', 'rstsandbox', 'rststable'],
+    install_requires=['six'],
     tests_require=tests_require,
     license='MIT',
     classifiers=[
