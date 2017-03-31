@@ -27,7 +27,7 @@ setup(
     package_data={'rsbhsm': ['data/*'],
                   'rsbhsm.tests': ['data/*']
                   },
-    install_requires=['six'],
+    install_requires=['transitions>=0.4.0', 'six', 'rsb-python', 'rstsandbox', 'rststable'],
     tests_require=tests_require,
     license='MIT',
     classifiers=[
