@@ -76,7 +76,6 @@ class RSBTransition(Transition):
         threading.Thread(target=RSBTransition.deactivate,
                          args=(evs,)).start()
 
-
         super(RSBTransition, self)._change_state(event_data)
         for t in trigger_dst:
             event_data.machine.events[t].activate()

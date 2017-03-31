@@ -1,5 +1,5 @@
 six
-transitions
+transitions<0.5.0
 rsb-python
 rstsandbox
 rststable
