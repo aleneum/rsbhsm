@@ -128,7 +128,6 @@ class RSBHierarchicalStateMachine(Machine):
         trigger_name = kwargs['trigger'] if 'trigger' in kwargs else args[0]
         self.events[trigger_name].set_rsb(scope, msg_type)
 
-
     @staticmethod
     def _create_state(*args, **kwargs):
         return RSBState(*args, **kwargs)
