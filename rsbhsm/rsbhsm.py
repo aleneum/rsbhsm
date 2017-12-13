@@ -108,7 +108,7 @@ class RSBState(State):
         super(RSBState, self).enter(event_data)
         if self.action_cls:
             self.action = self.action_cls(model=event_data.model)
-            event_data.machine._callback(self.action.enter, event_data)
+            event_data.machine.callback(self.action.enter, event_data)
 
     def exit(self, event_data):
         if self.action:
